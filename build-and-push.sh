@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Configuration
-IMAGE_NAME="your-registry/subql-node-ethereum-fixed"
+IMAGE_NAME="liver23/subql-node-ethereum-fixed"
 IMAGE_TAG="v6.1.1-fixed"
-REGISTRY="your-registry.com"  # Replace with your registry (Docker Hub, AWS ECR, etc.)
+REGISTRY="docker.io"  # Docker Hub
 
 # Build the custom image
 echo "Building custom SubQuery Ethereum node image..."

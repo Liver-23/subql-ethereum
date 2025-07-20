@@ -3,7 +3,7 @@ version: "3"
 services:
   node_qmnihsztax8nb1l:
     # Replace with your custom image
-    image: your-registry.com/your-registry/subql-node-ethereum-fixed:v6.1.1-fixed
+    image: docker.io/liver23/subql-node-ethereum-fixed:v6.1.1-fixed
     container_name: node_qmnihsztax8nb1l
     user: "1000"
     restart: always
