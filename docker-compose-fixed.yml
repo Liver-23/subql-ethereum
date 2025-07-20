@@ -1,0 +1,76 @@
+version: "3"
+
+services:
+  node_qmnihsztax8nb1l:
+    # Replace with your custom image
+    image: your-registry.com/your-registry/subql-node-ethereum-fixed:v6.1.1-fixed
+    container_name: node_qmnihsztax8nb1l
+    user: "1000"
+    restart: always
+    cpus: 2
+    expose:
+      - 3100
+    environment:
+      DB_USER: "postgres"
+      DB_PASS: "gxpA5T5beCQfi"
+      DB_DATABASE: "postgres"
+      DB_HOST: indexer_db
+      DB_PORT: 5432
+      # Add environment variable to enable the fix
+      SUBQL_ENTITY_ID_FIX: "true"
+    volumes:
+      - /root/subquery-indexer-toolkit/tools/../.data/mmr/poi/QmNiHSztAX8Nb1Ld7BTFTX5aTEw2xQJgRsEArQfikcoeuP:/root/subquery-indexer-toolkit/tools/../.data/mmr/poi/QmNiHSztAX8Nb1Ld7BTFTX5aTEw2xQJgRsEArQfikcoeuP
+    command:
+      - -f=ipfs://QmNiHSztAX8Nb1Ld7BTFTX5aTEw2xQJgRsEArQfikcoeuP
+      - -d=
+      - --ipfs=http://indexer_ipfs:8080/api/v0/
+      - --network-endpoint=wss://manta-pacific.drpc.org
+      - --db-schema=schema_qmnihsztax8nb1l
+      - --port=3100
+      - --batch-size=10
+      - --timeout=1800
+      - --workers=1
+      - --store-cache-threshold=300
+      - --proof-of-index=true
+      - --mmr-store-type=file
+      - -m=/root/subquery-indexer-toolkit/tools/../.data/mmr/poi/QmNiHSztAX8Nb1Ld7BTFTX5aTEw2xQJgRsEArQfikcoeuP/.mmr
+      - --disable-historical=false
+      - --block-confirmations=100
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://node_qmnihsztax8nb1l:3100/ready"
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 100
+
+  query_qmnihsztax8nb1l:
+    image: subquerynetwork/subql-query:v2.23.2
+    container_name: query_qmnihsztax8nb1l
+    user: "1000"
+    expose:
+      - 3100
+    depends_on:
+      "node_qmnihsztax8nb1l":
+        condition: service_healthy
+    restart: always
+    environment:
+      DB_USER: "postgres"
+      DB_PASS: "gxpA5T5beCQfi"
+      DB_DATABASE: "postgres"
+      DB_HOST: indexer_db
+      DB_PORT: 5432
+    command:
+      - --name=schema_qmnihsztax8nb1l
+      - --playground
+      - --indexer=http://node_qmnihsztax8nb1l:3100
+      - --port=3100
+      - --query-limit=2000
+
+networks:
+  default:
+    name: indexer_services 
