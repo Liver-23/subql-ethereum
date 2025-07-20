@@ -1,7 +1,7 @@
 # Use the official SubQuery Ethereum node as base
 FROM subquerynetwork/subql-node-ethereum:v6.1.1
 
-# Create a wrapper script that applies the patch and then runs the original command
+# Create a wrapper script in a writable location
 RUN echo '#!/bin/sh\n\
 # Wrapper script that applies entity ID patch and then runs the original command\n\
 \n\
@@ -25,10 +25,10 @@ fi\n\
 \n\
 # Execute the original command with all arguments\n\
 exec /usr/local/bin/subql-node-ethereum "$@"\n\
-' > /usr/local/bin/subql-node-ethereum-wrapper
+' > /tmp/subql-node-ethereum-wrapper
 
 # Make the wrapper script executable
-RUN chmod +x /usr/local/bin/subql-node-ethereum-wrapper
+RUN chmod +x /tmp/subql-node-ethereum-wrapper
 
 # Use the wrapper as the entrypoint
-ENTRYPOINT ["/usr/local/bin/subql-node-ethereum-wrapper"] 
+ENTRYPOINT ["/tmp/subql-node-ethereum-wrapper"] 
