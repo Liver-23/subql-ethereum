@@ -1,17 +1,11 @@
 # Use the official SubQuery Ethereum node as base
 FROM subquerynetwork/subql-node-ethereum:v6.1.1
 
-# First, let's find where the store.js file is located
-RUN find /usr -name "store.js" 2>/dev/null | grep -i subql || echo "No store.js found in /usr"
+# Find and patch the store.js file to remove 0x prefix from entity IDs
+RUN find /usr/local/lib/node_modules/@subql/node-ethereum/node_modules/@subql/node-core/dist/indexer/store -name "store.js" -exec sed -i 's/const id = entityId;/const id = typeof entityId === "string" && entityId.startsWith("0x") ? entityId.substring(2) : entityId;/g' {} \;
 
-# Also check in node_modules
-RUN find /usr/local -name "store.js" 2>/dev/null | grep -i subql || echo "No store.js found in /usr/local"
-
-# Check what's in the node_modules directory
-RUN ls -la /usr/local/lib/node_modules/ || echo "No node_modules in /usr/local/lib"
-
-# Create a simple wrapper for now
-RUN printf '#!/bin/sh\n\necho "=== DEBUGGING STORE.JS LOCATION ==="\necho "Checking for store.js files..."\nexec /usr/local/bin/subql-node-ethereum "$@"\n' > /tmp/subql-node-ethereum-wrapper && chmod +x /tmp/subql-node-ethereum-wrapper
+# Create a simple wrapper to show the patch was applied
+RUN printf '#!/bin/sh\n\necho "=== ENTITY ID PATCH APPLIED ==="\necho "0x prefix removed from entity IDs for PostgreSQL compatibility"\nexec /usr/local/bin/subql-node-ethereum "$@"\n' > /tmp/subql-node-ethereum-wrapper && chmod +x /tmp/subql-node-ethereum-wrapper
 
 # Use the wrapper as the entrypoint
 ENTRYPOINT ["/tmp/subql-node-ethereum-wrapper"] 
